@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuCompat;
@@ -49,13 +50,27 @@ public class FilterChip extends LinearLayout {
 
   private final static String TAG = FilterChip.class.getSimpleName();
 
-  private final ViewFilterChipBinding binding;
+  private ViewFilterChipBinding binding;
   private FilterChipLiveData liveData;
-  private final Observer<FilterChipLiveData> liveDataObserver;
+  private Observer<FilterChipLiveData> liveDataObserver;
   private boolean firstTimePassed = false;  // necessary to prevent weird animation on fragment init
 
-  public FilterChip(@NonNull Context context, AttributeSet attributeSet) {
-    super(context, attributeSet);
+  public FilterChip(@NonNull Context context) {
+    super(context);
+    init(context);
+  }
+
+  public FilterChip(@NonNull Context context, @Nullable AttributeSet attrs) {
+    super(context, attrs);
+    init(context);
+  }
+
+  public FilterChip(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    super(context, attrs, defStyleAttr);
+    init(context);
+  }
+
+  public void init(@NonNull Context context) {
     binding = ViewFilterChipBinding.inflate(
         LayoutInflater.from(context),
         this,
@@ -71,24 +86,34 @@ public class FilterChip extends LinearLayout {
   }
 
   public void setData(FilterChipLiveData data) {
+    setData(data, false);
+  }
+
+  public void setData(FilterChipLiveData data, boolean noAnimations) {
     liveData = data;
     if (isAttachedToWindow() && !liveData.hasObservers()) {
       liveData.observeForever(liveDataObserver);
     }
 
     // background color
-    int bgColorFrom = binding.card.getCardBackgroundColor().getColorForState(
-        EMPTY_STATE_SET, Color.TRANSPARENT
-    );
-    int bgColorTo = data.isActive()
-        ? ResUtil.getColorAttr(getContext(), R.attr.colorSecondaryContainer)
-        : Color.TRANSPARENT;
-    ValueAnimator colorAnimation = ValueAnimator.ofArgb(bgColorFrom, bgColorTo);
-    colorAnimation.setDuration(250);
-    colorAnimation.addUpdateListener(
-        animation -> binding.card.setCardBackgroundColor((int) animation.getAnimatedValue())
-    );
-    colorAnimation.start();
+    if (noAnimations) {
+      binding.card.setCardBackgroundColor(data.isActive()
+          ? ResUtil.getColorAttr(getContext(), R.attr.colorSecondaryContainer)
+          : Color.TRANSPARENT);
+    } else {
+      int bgColorFrom = binding.card.getCardBackgroundColor().getColorForState(
+          EMPTY_STATE_SET, Color.TRANSPARENT
+      );
+      int bgColorTo = data.isActive()
+          ? ResUtil.getColorAttr(getContext(), R.attr.colorSecondaryContainer)
+          : Color.TRANSPARENT;
+      ValueAnimator colorAnimation = ValueAnimator.ofArgb(bgColorFrom, bgColorTo);
+      colorAnimation.setDuration(250);
+      colorAnimation.addUpdateListener(
+          animation -> binding.card.setCardBackgroundColor((int) animation.getAnimatedValue())
+      );
+      colorAnimation.start();
+    }
 
     // text
     binding.text.setText(data.getText());

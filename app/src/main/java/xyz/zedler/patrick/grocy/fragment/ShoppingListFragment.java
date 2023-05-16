@@ -116,17 +116,31 @@ public class ShoppingListFragment extends BaseFragment implements
     binding.setFragment(this);
     binding.setLifecycleOwner(getViewLifecycleOwner());
 
-    SystemBarBehavior systemBarBehavior = new SystemBarBehavior(activity);
-    systemBarBehavior.setAppBar(binding.appBar);
+    SystemBarBehavior systemBarBehavior = activity.getSystemBarBehavior();
     systemBarBehavior.setContainer(binding.swipeShoppingList);
     systemBarBehavior.setRecycler(binding.recycler);
-    systemBarBehavior.applyAppBarInsetOnContainer(false);
+    systemBarBehavior.applyAppBarInsetOnContainer(true);
     systemBarBehavior.applyStatusBarInsetOnContainer(false);
     systemBarBehavior.setUp();
-    activity.setSystemBarBehavior(systemBarBehavior);
 
-    binding.toolbar.setNavigationOnClickListener(v -> activity.onBackPressed());
-    binding.toolbar.setOnClickListener(v -> showShoppingListsBottomSheet());
+    activity.binding.appBar.animateChanges(
+        activity.binding.appBar.binding.appBarDefault,
+        () -> {
+          activity.binding.appBar.binding.matrialToolbar.setNavigationOnClickListener(v -> activity.onBackPressed());
+          activity.binding.appBar.binding.matrialToolbar.setOnClickListener(v -> showShoppingListsBottomSheet());
+          activity.binding.appBar.binding.buttonShoppingListLists.setOnClickListener(v -> showShoppingListsBottomSheet());
+          activity.binding.appBar.binding.searchClose.setOnClickListener(v -> dismissSearch());
+          activity.binding.appBar.setOnSearchFieldTextChanged(s -> viewModel.updateSearchInput(s));
+          activity.binding.appBar.setOnKeyboardSearchListener(() -> activity.hideKeyboard());
+
+          activity.binding.appBar.setFilterScrollViewVisibility(true);
+        }
+    );
+
+    viewModel.getOfflineLive().observe(
+        getViewLifecycleOwner(),
+        offline -> activity.binding.appBar.setOfflineInfoVisibility(offline)
+    );
 
     infoFullscreenHelper = new InfoFullscreenHelper(binding.frame);
     clickUtil = new ClickUtil();
@@ -137,8 +151,8 @@ public class ShoppingListFragment extends BaseFragment implements
 
     appBarBehavior = new AppBarBehavior(
         activity,
-        binding.appBarDefault,
-        binding.appBarSearch,
+        activity.binding.appBar.binding.appBarDefault,
+        activity.binding.appBar.binding.appBarSearch,
         savedInstanceState
     );
 
@@ -271,7 +285,7 @@ public class ShoppingListFragment extends BaseFragment implements
 
     activity.getScrollBehavior().setNestedOverScrollFixEnabled(true);
     activity.getScrollBehavior().setUpScroll(
-        binding.appBar, false, binding.recycler, true, true
+        activity.binding.appBar, false, binding.recycler, true, true
     );
     activity.getScrollBehavior().setBottomBarVisibility(true);
     activity.updateBottomAppBar(
@@ -310,10 +324,10 @@ public class ShoppingListFragment extends BaseFragment implements
       return;
     }
     // change app bar title to shopping list name
-    if (Objects.equals(binding.toolbar.getTitle(), shoppingList.getName())) {
+    if (Objects.equals(activity.binding.appBar.binding.matrialToolbar.getTitle(), shoppingList.getName())) {
       return;
     }
-    binding.toolbar.setTitle(shoppingList.getName());
+    activity.binding.appBar.binding.matrialToolbar.setTitle(shoppingList.getName());
   }
 
   @Override
@@ -553,8 +567,8 @@ public class ShoppingListFragment extends BaseFragment implements
 
   private void hideDisabledFeatures() {
     if (isFeatureMultipleListsDisabled()) {
-      binding.buttonShoppingListLists.setVisibility(View.GONE);
-      binding.toolbar.setOnClickListener(null);
+      activity.binding.appBar.binding.buttonShoppingListLists.setVisibility(View.GONE);
+      activity.binding.appBar.binding.toolbar.setOnClickListener(null);
     }
   }
 
@@ -596,10 +610,10 @@ public class ShoppingListFragment extends BaseFragment implements
   private void setUpSearch() {
     if (!viewModel.isSearchVisible()) {
       appBarBehavior.switchToSecondary();
-      binding.editTextShoppingListSearch.setText("");
+      //binding.editTextShoppingListSearch.setText("");
     }
-    binding.textInputShoppingListSearch.requestFocus();
-    activity.showKeyboard(binding.editTextShoppingListSearch);
+    //binding.textInputShoppingListSearch.requestFocus();
+    //activity.showKeyboard(binding.editTextShoppingListSearch);
 
     viewModel.setIsSearchVisible(true);
   }
@@ -613,7 +627,7 @@ public class ShoppingListFragment extends BaseFragment implements
   public void dismissSearch() {
     appBarBehavior.switchToPrimary();
     activity.hideKeyboard();
-    binding.editTextShoppingListSearch.setText("");
+    //binding.editTextShoppingListSearch.setText("");
     viewModel.setIsSearchVisible(false);
   }
 

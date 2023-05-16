@@ -779,16 +779,16 @@ public class ShoppingListViewModel extends BaseViewModel {
     return quantityUnitHashMap;
   }
 
-  public FilterChipLiveData.Listener getFilterChipLiveDataStatus() {
-    return () -> filterChipLiveDataStatus;
+  public FilterChipLiveData getFilterChipLiveDataStatus() {
+    return filterChipLiveDataStatus;
   }
 
-  public FilterChipLiveData.Listener getFilterChipLiveDataGrouping() {
-    return () -> filterChipLiveDataGrouping;
+  public FilterChipLiveData getFilterChipLiveDataGrouping() {
+    return filterChipLiveDataGrouping;
   }
 
-  public FilterChipLiveData.Listener getFilterChipLiveDataExtraField() {
-    return () -> filterChipLiveDataExtraField;
+  public FilterChipLiveData getFilterChipLiveDataExtraField() {
+    return filterChipLiveDataExtraField;
   }
 
   public String getGroupingMode() {

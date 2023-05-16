@@ -36,6 +36,7 @@ import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -142,6 +143,18 @@ public class MainActivity extends AppCompatActivity {
 
     sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
     debug = PrefsUtil.isDebuggingEnabled(sharedPrefs);
+
+    StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+        .detectDiskReads()
+        .detectDiskWrites()
+        .detectNetwork()   // or .detectAll() for all detectable problems
+        .penaltyLog()
+        .build());
+    StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+        .detectLeakedSqlLiteObjects()
+        .detectLeakedClosableObjects()
+        .penaltyLog()
+        .build());
 
     // DARK MODE AND THEME
 
@@ -263,6 +276,11 @@ public class MainActivity extends AppCompatActivity {
     );
 
     // IME ANIMATION
+
+    systemBarBehavior = new SystemBarBehavior(this);
+    systemBarBehavior.setAppBar(binding.appBar);
+    binding.appBar.setLiftableOverrideEnabled(true);
+    binding.appBar.setLifted(true);
 
     Callback callback = new Callback(Callback.DISPATCH_MODE_STOP) {
       WindowInsetsAnimationCompat animation;
@@ -451,6 +469,11 @@ public class MainActivity extends AppCompatActivity {
 
   public BottomScrollBehavior getScrollBehavior() {
     return scrollBehavior;
+  }
+
+
+  public SystemBarBehavior getSystemBarBehavior() {
+    return systemBarBehavior;
   }
 
   public void setSystemBarBehavior(SystemBarBehavior behavior) {

@@ -37,7 +37,6 @@ import xyz.zedler.patrick.grocy.R;
 import xyz.zedler.patrick.grocy.activity.MainActivity;
 import xyz.zedler.patrick.grocy.behavior.SystemBarBehavior;
 import xyz.zedler.patrick.grocy.databinding.FragmentOverviewStartBinding;
-import xyz.zedler.patrick.grocy.fragment.bottomSheetDialog.FeedbackBottomSheet;
 import xyz.zedler.patrick.grocy.model.Event;
 import xyz.zedler.patrick.grocy.model.SnackbarMessage;
 import xyz.zedler.patrick.grocy.util.ClickUtil;
@@ -87,14 +86,25 @@ public class OverviewStartFragment extends BaseFragment {
     binding.setActivity(activity);
     binding.setLifecycleOwner(getViewLifecycleOwner());
 
-    SystemBarBehavior systemBarBehavior = new SystemBarBehavior(activity);
-    systemBarBehavior.setAppBar(binding.appBar);
+    SystemBarBehavior systemBarBehavior = activity.getSystemBarBehavior();
     systemBarBehavior.setContainer(binding.swipe);
     systemBarBehavior.setScroll(binding.scroll, binding.constraint);
-    systemBarBehavior.applyAppBarInsetOnContainer(false);
+    systemBarBehavior.applyAppBarInsetOnContainer(true);
     systemBarBehavior.applyStatusBarInsetOnContainer(false);
     systemBarBehavior.setUp();
-    activity.setSystemBarBehavior(systemBarBehavior);
+
+    activity.binding.appBar.animateChanges(
+        activity.binding.appBar.binding.titleBar,
+        () -> {
+          activity.binding.appBar.setFilterScrollViewVisibility(false);
+          systemBarBehavior.refresh();
+        }
+    );
+
+    viewModel.getOfflineLive().observe(
+        getViewLifecycleOwner(),
+        offline -> activity.binding.appBar.setOfflineInfoVisibility(offline)
+    );
 
     ViewUtil.setOnlyOverScrollStretchEnabled(binding.scrollHorizActionsStockOverview);
     binding.scrollHorizActionsStockOverview.post(
@@ -130,7 +140,7 @@ public class OverviewStartFragment extends BaseFragment {
       }
     });
 
-    binding.toolbar.setOnMenuItemClickListener(item -> {
+    /*binding.toolbar.setOnMenuItemClickListener(item -> {
       int id = item.getItemId();
       if (id == R.id.action_settings) {
         activity.navUtil.navigateDeepLink(getString(R.string.deep_link_settingsFragment));
@@ -142,7 +152,7 @@ public class OverviewStartFragment extends BaseFragment {
         activity.showBottomSheet(new FeedbackBottomSheet());
       }
       return false;
-    });
+    });*/
 
     if (savedInstanceState == null) {
       viewModel.loadFromDatabase(true);
@@ -154,7 +164,7 @@ public class OverviewStartFragment extends BaseFragment {
         || getArguments().getBoolean(Constants.ARGUMENT.ANIMATED, true))
         && savedInstanceState == null;
     activity.getScrollBehavior().setNestedOverScrollFixEnabled(true);
-    activity.getScrollBehavior().setUpScroll(binding.appBar, false, binding.scroll);
+    //activity.getScrollBehavior().setUpScroll(binding.appBar, false, binding.scroll);
     activity.getScrollBehavior().setBottomBarVisibility(true);
     activity.updateBottomAppBar(viewModel.isFeatureEnabled(PREF.FEATURE_STOCK), R.menu.menu_empty);
     activity.updateFab(
@@ -258,7 +268,7 @@ public class OverviewStartFragment extends BaseFragment {
     if (clickUtil.isDisabled()) {
       return;
     }
-    ViewUtil.startIcon(binding.imageLogo);
+    //ViewUtil.startIcon(binding.imageLogo);
   }
 
   @Override

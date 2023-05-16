@@ -114,14 +114,26 @@ public class StockOverviewFragment extends BaseFragment implements
     infoFullscreenHelper = new InfoFullscreenHelper(binding.frame);
     clickUtil = new ClickUtil();
 
-    SystemBarBehavior systemBarBehavior = new SystemBarBehavior(activity);
-    systemBarBehavior.setAppBar(binding.appBar);
+    SystemBarBehavior systemBarBehavior = activity.getSystemBarBehavior();
     systemBarBehavior.setContainer(binding.swipe);
     systemBarBehavior.setRecycler(binding.recycler);
-    systemBarBehavior.applyAppBarInsetOnContainer(false);
+    systemBarBehavior.applyAppBarInsetOnContainer(true);
     systemBarBehavior.applyStatusBarInsetOnContainer(false);
     systemBarBehavior.setUp();
-    activity.setSystemBarBehavior(systemBarBehavior);
+
+    activity.binding.appBar.animateChanges(
+        activity.binding.appBar.binding.appBarDefault,
+        () -> {
+          activity.binding.appBar.binding.matrialToolbar.setTitle(R.string.title_stock_overview);
+          activity.binding.appBar.setFilterScrollViewVisibility(true);
+          systemBarBehavior.refresh();
+        }
+    );
+
+    viewModel.getOfflineLive().observe(
+        getViewLifecycleOwner(),
+        offline -> activity.binding.appBar.setOfflineInfoVisibility(offline)
+    );
 
     binding.toolbarDefault.setNavigationOnClickListener(v -> activity.navUtil.navigateUp());
 
