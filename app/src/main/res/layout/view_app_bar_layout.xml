@@ -30,7 +30,7 @@
   <FrameLayout
     android:id="@+id/top_bar"
     android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize">
+    android:layout_height="wrap_content">
 
     <FrameLayout
       android:id="@+id/title_bar"
@@ -63,27 +63,70 @@
 
     </FrameLayout>
 
-    <FrameLayout
+    <LinearLayout
       android:id="@+id/app_bar_default"
       android:layout_width="match_parent"
-      android:layout_height="?attr/actionBarSize"
-      android:visibility="gone">
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      android:orientation="vertical">
 
-      <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/matrial_toolbar"
-        style="@style/Widget.Grocy.Toolbar.Back"
-        app:title="@string/title_shopping_list"
-        app:titleCentered="true"
-        app:titleMarginEnd="48dp" />
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize">
 
-      <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_shopping_list_lists"
-        style="@style/Widget.Grocy.Button.IconButton"
-        android:layout_marginStart="20dp"
-        android:layout_gravity="end|center_vertical"
-        app:icon="@drawable/ic_round_expand_more" />
+        <com.google.android.material.appbar.MaterialToolbar
+          android:id="@+id/matrial_toolbar"
+          style="@style/Widget.Grocy.Toolbar.Back"
+          app:title="@string/title_shopping_list"
+          app:titleCentered="true"
+          app:titleMarginEnd="48dp" />
 
-    </FrameLayout>
+        <com.google.android.material.button.MaterialButton
+          android:id="@+id/button_shopping_list_lists"
+          style="@style/Widget.Grocy.Button.IconButton"
+          android:layout_marginStart="20dp"
+          android:layout_gravity="end|center_vertical"
+          app:icon="@drawable/ic_round_expand_more" />
+
+      </LinearLayout>
+
+
+      <HorizontalScrollView
+        android:id="@+id/filter_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:scrollbars="none"
+        android:overScrollMode="ifContentScrolls"
+        android:visibility="gone">
+
+        <LinearLayout
+          android:id="@+id/filter_container"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          android:paddingStart="12dp"
+          android:paddingEnd="12dp">
+
+          <xyz.zedler.patrick.grocy.view.FilterChip
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:data="@{viewModel.filterChipLiveDataStatus}"/>
+
+          <View
+            android:layout_width="1dp"
+            android:layout_height="18dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_gravity="center_vertical"
+            android:background="?attr/colorOutlineVariant"/>
+
+        </LinearLayout>
+
+      </HorizontalScrollView>
+
+
+    </LinearLayout>
 
     <LinearLayout
       android:id="@+id/app_bar_search"
@@ -185,40 +228,6 @@
     </LinearLayout>
 
   </FrameLayout>
-
-  <HorizontalScrollView
-    android:id="@+id/filter_scroll_view"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="4dp"
-    android:scrollbars="none"
-    android:overScrollMode="ifContentScrolls"
-    android:visibility="gone">
-
-    <LinearLayout
-      android:id="@+id/filter_container"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      android:paddingStart="12dp"
-      android:paddingEnd="12dp">
-
-      <xyz.zedler.patrick.grocy.view.FilterChip
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:data="@{viewModel.filterChipLiveDataStatus}"/>
-
-      <View
-        android:layout_width="1dp"
-        android:layout_height="18dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:layout_gravity="center_vertical"
-        android:background="?attr/colorOutlineVariant"/>
-
-    </LinearLayout>
-
-  </HorizontalScrollView>
 
   <FrameLayout
     android:id="@+id/offline_info"

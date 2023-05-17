@@ -132,7 +132,8 @@ public class ShoppingListFragment extends BaseFragment implements
           activity.binding.appBar.binding.searchClose.setOnClickListener(v -> dismissSearch());
           activity.binding.appBar.setOnSearchFieldTextChanged(s -> viewModel.updateSearchInput(s));
           activity.binding.appBar.setOnKeyboardSearchListener(() -> activity.hideKeyboard());
-
+          activity.binding.appBar.setFilters(viewModel.getFilterChipLiveDataStatus(), null,
+              viewModel.getFilterChipLiveDataGrouping(), viewModel.getFilterChipLiveDataExtraField());
           activity.binding.appBar.setFilterScrollViewVisibility(true);
         }
     );

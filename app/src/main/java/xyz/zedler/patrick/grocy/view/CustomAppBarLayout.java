@@ -19,6 +19,7 @@
 
 package xyz.zedler.patrick.grocy.view;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -27,12 +28,10 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.transition.ChangeBounds;
-import androidx.transition.Transition;
-import androidx.transition.TransitionManager;
 import com.google.android.material.appbar.AppBarLayout;
 import xyz.zedler.patrick.grocy.R;
 import xyz.zedler.patrick.grocy.databinding.ViewAppBarLayoutBinding;
@@ -133,20 +132,36 @@ public class CustomAppBarLayout extends AppBarLayout {
     }
 
     if (viewFadeOut != null) {
-      viewFadeOut.setVisibility(GONE);
-      /*View finalViewFadeOut = viewFadeOut;
+      View finalViewFadeOut = viewFadeOut;
       viewFadeOut.animate().alpha(0f).setDuration(200)
-          .withEndAction(() -> finalViewFadeOut.setVisibility(GONE));*/
+          .withEndAction(() -> finalViewFadeOut.setVisibility(GONE));
     }
-    //titleBar.setAlpha(0f);
+    titleBar.setAlpha(0f);
     titleBar.setVisibility(View.VISIBLE);
-    //titleBar.animate().alpha(1f).setDuration(200);
+    titleBar.animate().alpha(1f).setDuration(200);
+
+
 
     changes.run();
 
+    int height = binding.appBar.getMeasuredHeight();
 
-    Transition transition1 = new ChangeBounds().setDuration(200);
-    TransitionManager.beginDelayedTransition(this, transition1);
+
+    if (height > 0) {
+      int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, MeasureSpec.AT_MOST);
+      int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+      binding.appBar.measure(widthMeasureSpec, heightMeasureSpec);
+      ValueAnimator anim = ValueAnimator.ofInt(height, binding.appBar.getMeasuredHeight());
+      anim.addUpdateListener(valueAnimator -> {
+        int val = (Integer) valueAnimator.getAnimatedValue();
+        ViewGroup.LayoutParams layoutParams = binding.appBar.getLayoutParams();
+        layoutParams.height = val;
+        binding.appBar.setLayoutParams(layoutParams);
+      });
+      anim.setDuration(200);
+      anim.start();
+    }
+
 
   }
 
