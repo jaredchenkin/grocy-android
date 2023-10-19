@@ -46,6 +46,7 @@ import android.view.Window;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
+import android.widget.EditText;
 import androidx.annotation.Dimension;
 import androidx.annotation.MenuRes;
 import androidx.annotation.NonNull;
@@ -86,6 +87,7 @@ public class UiUtil {
   private boolean wasKeyboardOpened;
   private float fabBaseY;
   private int focusedScrollOffset;
+  private int bottomInsetIme;
 
   public static void setTheme(Activity activity, SharedPreferences sharedPrefs) {
     switch (sharedPrefs.getString(SETTINGS.APPEARANCE.THEME, SETTINGS_DEFAULT.APPEARANCE.THEME)) {
@@ -417,6 +419,14 @@ public class UiUtil {
         // scroll offset to keep focused view visible
         ViewGroup scrollView = scrollBehavior.getScrollView();
         if (scrollView != null) {
+          View parent = (View) scrollView.getParent();
+          parent.setPadding(
+              parent.getPaddingLeft(),
+              parent.getPaddingTop(),
+              parent.getPaddingRight(),
+              bottomInsetIme
+          );
+
           scrollView.setScrollY(
               (int) MathUtils.lerp(yScrollStart, yScrollEnd, animation.getInterpolatedFraction())
           );
@@ -451,7 +461,29 @@ public class UiUtil {
 
         // scroll offset to keep focused view visible
         View focused = activity.getCurrentFocus();
-        if (focused != null) {
+        if (focused instanceof EditText) {
+          EditText editText = (EditText) focused;
+          int cursorPosition = editText.getSelectionStart();
+          if (editText.getLayout() != null) {
+            int line = editText.getLayout().getLineForOffset(cursorPosition);
+            int cursorYTop = (int) editText.getLayout().getLineTop(line);
+            int cursorYBottom = (int) editText.getLayout().getLineBottom(line);
+            int lineHeight = cursorYBottom - cursorYTop;
+            int[] location = new int[2];
+            editText.getLocationInWindow(location);
+            int absoluteCursorYBottom = location[1] + cursorYBottom;
+            int screenHeight = UiUtil.getDisplayHeight(activity);
+            int bottomSpace = screenHeight - absoluteCursorYBottom;
+
+            if (bottomSpace - lineHeight*3 < bottomInsetIme) {
+              focusedScrollOffset = bottomInsetIme - bottomSpace + lineHeight*3;
+            } else {
+              focusedScrollOffset = 0;
+            }
+          } else {
+            focusedScrollOffset = 0;
+          }
+        } else if (focused != null) {
           int[] location = new int[2];
           focused.getLocationInWindow(location);
           location[1] += focused.getHeight();
@@ -476,6 +508,23 @@ public class UiUtil {
         // scroll offset to keep focused view visible
         focusedScrollOffset = 0;
       }
+
+      // true if for example keyboard type changes and numeric keyboard is higher
+      boolean imeInsetChanged = bottomInsetIme != this.bottomInsetIme
+          && bottomInsetIme != 0 && this.bottomInsetIme != 0;
+      this.bottomInsetIme = bottomInsetIme;
+
+      ViewGroup scrollView = scrollBehavior.getScrollView();
+      if (imeInsetChanged && scrollView != null) {
+        View parent = (View) scrollView.getParent();
+        parent.setPadding(
+            parent.getPaddingLeft(),
+            parent.getPaddingTop(),
+            parent.getPaddingRight(),
+            bottomInsetIme
+        );
+      }
+
       return insets;
     });
     ViewCompat.setWindowInsetsAnimationCallback(binding.coordinatorMain, callback);
